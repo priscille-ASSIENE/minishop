@@ -35,3 +35,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. On cible les éléments HTML (sur les pages de votre coéquipière Chloe)
+    const searchInput = document.querySelector('#search-input');
+    const productsContainer = document.querySelector('#products-container');
+
+    if (searchInput) {
+        // 2. On écoute ce que l'utilisateur tape dans la barre de recherche
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+
+            if (query.length < 2) {
+                return; // Ne recherche pas si moins de 2 caractères
+            }
+
+            try {
+                // 3. Appel vers l'API PHP de recherche
+                const response = await fetch(`API/search_products.php?q=${encodeURIComponent(query)}`);
+                const products = await response.json();
+
+                // 4. Affichage dynamique des résultats dans la page
+                if (productsContainer) {
+                    productsContainer.innerHTML = '';
+                    if (products.length > 0) {
+                        products.forEach(product => {
+                            productsContainer.innerHTML += `
+                                <div class="product-card">
+                                    <h3>${product.nom || product.name}</h3>
+                                    <p>${product.prix || product.price} €</p>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        productsContainer.innerHTML = '<p>Aucun produit trouvé.</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors de la recherche :', error);
+            }
+        });
+    }
+});
